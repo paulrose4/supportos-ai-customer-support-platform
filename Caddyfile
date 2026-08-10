@@ -1,0 +1,35 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	log {
+		output stdout
+		format json
+	}
+
+	header {
+		-Server
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Content-Security-Policy "default-src 'self'; connect-src 'self' ws: wss:; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+	}
+
+	@publicWidgetBot {
+		path /v1/public-widget/*
+		header_regexp User-Agent (?i)(googlebot|bingbot|yandexbot|baiduspider|bytespider|petalbot|duckduckbot|gptbot|chatgpt-user|claudebot|claude-web|anthropic-ai|ccbot|perplexitybot|amazonbot|cohere-ai|meta-externalagent|slurp|semrushbot|ahrefsbot|mj12bot|dotbot|facebookexternalhit|twitterbot|linkedinbot|applebot|headlesschrome|bot|crawler|spider)
+	}
+	respond @publicWidgetBot 403
+
+	@api path /v1/* /health/* /widget.js /widget-runtime.js /widget.css
+	reverse_proxy @api api:8000 {
+		flush_interval -1
+	}
+	reverse_proxy dashboard:80
+}

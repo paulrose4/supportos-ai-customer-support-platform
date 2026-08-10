@@ -1,0 +1,11 @@
+{
+  "case_pass_rate": 1.0,
+  "direct_answer_rate": 1.0,
+  "context_continuity_rate": 1.0,
+  "unnecessary_follow_up_free_rate": 1.0,
+  "unnecessary_cta_free_rate": 1.0,
+  "phrase_repetition_free_rate": 1.0,
+  "correction_handling_rate": 1.0,
+  "handoff_quality_rate": 1.0,
+  "tone_match_rate": 1.0
+}

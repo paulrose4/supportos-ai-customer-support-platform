@@ -1,0 +1,36 @@
+name = "supportos-storefront-connector"
+main = "src/index.ts"
+compatibility_date = "2026-07-18"
+workers_dev = false
+
+routes = [
+  { pattern = "shop.example.com/support-agent/chat*", zone_name = "example.com" },
+  { pattern = "shop.example.com/support-agent/messages*", zone_name = "example.com" },
+  { pattern = "shop.example.com/support-agent/presence*", zone_name = "example.com" },
+]
+
+[vars]
+AGENT_API_BASE_URL = "https://support-api.example.com"
+PUBLIC_ORIGIN = "https://shop.example.com"
+ALLOW_INSECURE_AGENT_API = "false"
+ALLOW_MISSING_ORIGIN = "false"
+
+[[ratelimits]]
+name = "CHAT_LIMITER"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
+
+[[ratelimits]]
+name = "PRESENCE_LIMITER"
+namespace_id = "1002"
+simple = { limit = 6, period = 60 }
+
+[[ratelimits]]
+name = "PRESENCE_SOURCE_LIMITER"
+namespace_id = "1003"
+simple = { limit = 120, period = 60 }
+
+[[ratelimits]]
+name = "PRESENCE_SITE_LIMITER"
+namespace_id = "1004"
+simple = { limit = 30000, period = 60 }

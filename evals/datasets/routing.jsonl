@@ -1,0 +1,13 @@
+{"message":"如何启用产品？","expected_risk":0}
+{"message":"查询订单状态 DEMO-ORDER-1001","expected_risk":1}
+{"message":"查询工单状态 DEMO-TICKET-2001","expected_risk":1}
+{"message":"我要退款","expected_risk":2}
+{"message":"请取消订单","expected_risk":2}
+{"message":"I want to cancel my order.","expected_risk":2}
+{"message":"Please refund this order.","expected_risk":2}
+{"message":"Bestellung stornieren","expected_risk":2}
+{"message":"My account may have been stolen.","expected_risk":3}
+{"message":"This looks like a cross-tenant data leak.","expected_risk":3}
+{"message":"账号被盗号了","expected_risk":3}
+{"message":"我要投诉数据泄露","expected_risk":3}
+{"message":"我要跨租户查询","expected_risk":3}

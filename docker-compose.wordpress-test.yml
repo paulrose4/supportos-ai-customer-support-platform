@@ -1,0 +1,67 @@
+services:
+  wordpress-db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: wordpress
+      MARIADB_ROOT_PASSWORD: wordpress-root
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - wordpress_test_db:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:7.0.1-php8.3-apache
+    environment:
+      WORDPRESS_DB_HOST: wordpress-db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DEBUG: "1"
+    depends_on:
+      wordpress-db:
+        condition: service_healthy
+    ports:
+      - "8085:80"
+    volumes:
+      - wordpress_test_files:/var/www/html
+      - ./wordpress-plugin/company-product-support-agent:/var/www/html/wp-content/plugins/company-product-support-agent:ro
+    networks:
+      - default
+      - agent
+
+  wordpress-cli:
+    image: wordpress:cli-php8.3
+    entrypoint: ["wp"]
+    user: "33:33"
+    environment:
+      WORDPRESS_DB_HOST: wordpress-db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      wordpress-db:
+        condition: service_healthy
+      wordpress:
+        condition: service_started
+    volumes:
+      - wordpress_test_files:/var/www/html
+      - ./wordpress-plugin/company-product-support-agent:/var/www/html/wp-content/plugins/company-product-support-agent:ro
+    networks:
+      - default
+      - agent
+    profiles: ["tools"]
+
+volumes:
+  wordpress_test_db:
+  wordpress_test_files:
+
+networks:
+  agent:
+    external: true
+    name: obsidianragagent_default
+

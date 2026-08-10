@@ -1,0 +1,367 @@
+name: customer-support-agent
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-fastembed-cache-environment: &fastembed-cache-environment
+  HF_HOME: /home/app/.cache/fastembed/huggingface
+  HF_HUB_CACHE: /home/app/.cache/fastembed/huggingface/hub
+  HF_XET_CACHE: /home/app/.cache/fastembed/huggingface/xet
+
+services:
+  caddy:
+    logging: *default-logging
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:?Set APP_DOMAIN in .env.production}
+      ACME_EMAIL: ${ACME_EMAIL:?Set ACME_EMAIL in .env.production}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - edge
+    depends_on:
+      dashboard:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
+
+  dashboard:
+    logging: *default-logging
+    build:
+      context: ./dashboard
+    restart: unless-stopped
+    networks:
+      - edge
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  api:
+    init: true
+    logging: *default-logging
+    build:
+      context: .
+      target: runtime
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --workers
+      - "1"
+      - --proxy-headers
+      - --forwarded-allow-ips=*
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    environment:
+      <<: *fastembed-cache-environment
+      # The runtime process must never receive the schema-owner credential.
+      MIGRATION_DATABASE_URL: ""
+      # File heartbeat is retained only for container diagnostics. Tenant
+      # admission uses the PostgreSQL worker registry.
+      WEB_SYNC_WORKER_HEARTBEAT_PATH: /app/web-sync-status/heartbeat
+    volumes:
+      - ./backups/status:/app/backup-status:ro
+      - ./examples/global-vault:/data/global-vault:ro
+      - fastembed_cache:/home/app/.cache/fastembed
+      - web_sync_worker_status:/app/web-sync-status:ro
+      - widget_assets:/app/data/widget-assets
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - edge
+      - data
+      - monitoring
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)"
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  web-sync-worker:
+    init: true
+    profiles: ["web-sync"]
+    logging: *default-logging
+    build:
+      context: .
+      target: runtime
+    command: ["python", "scripts/run_web_sync_worker.py"]
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    environment:
+      <<: *fastembed-cache-environment
+      MIGRATION_DATABASE_URL: ""
+      WEB_SYNC_WORKER_HEARTBEAT_PATH: /app/web-sync-status/heartbeat
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - fastembed_cache:/home/app/.cache/fastembed
+      - web_sync_worker_status:/app/web-sync-status
+    networks:
+      - data
+      - egress
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - >-
+          from pathlib import Path; import time;
+          p=Path('/app/web-sync-status/heartbeat');
+          raise SystemExit(0 if p.exists() and time.time()-p.stat().st_mtime < 60 else 1)
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  outbox-worker:
+    init: true
+    logging: *default-logging
+    build:
+      context: .
+      target: runtime
+    command: ["python", "scripts/run_outbox_worker.py"]
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    environment:
+      MIGRATION_DATABASE_URL: ""
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    networks:
+      - data
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  tenant-experience-worker:
+    init: true
+    logging: *default-logging
+    build:
+      context: .
+      target: runtime
+    command: ["python", "scripts/run_tenant_experience_worker.py", "serve"]
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    environment:
+      <<: *fastembed-cache-environment
+      MIGRATION_DATABASE_URL: ""
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - fastembed_cache:/home/app/.cache/fastembed
+    networks:
+      - data
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_healthy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  migrate:
+    logging: *default-logging
+    build:
+      context: .
+      target: runtime
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && python -m scripts.validate_database_schema
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    restart: "no"
+    networks:
+      - data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  postgres:
+    logging: *default-logging
+    image: pgvector/pgvector:pg17
+    env_file:
+      - ${ENV_FILE:-.env.production}
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/postgres/init-production-roles.sh:/docker-entrypoint-initdb.d/20-production-roles.sh:ro
+    networks:
+      - data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    shm_size: 256mb
+    security_opt:
+      - no-new-privileges:true
+
+  qdrant:
+    logging: *default-logging
+    image: qdrant/qdrant:v1.18.2
+    restart: unless-stopped
+    volumes:
+      - qdrant_storage:/qdrant/storage
+      - qdrant_snapshots:/qdrant/snapshots
+    networks:
+      - data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333;
+          printf "GET /healthz HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n" >&3;
+          IFS= read -r line <&3; [[ "$${line}" == *"200"* ]]'
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 300s
+    security_opt:
+      - no-new-privileges:true
+
+  redis:
+    logging: *default-logging
+    image: redis:7.4-alpine
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env.production}
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+      - --requirepass
+      - ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env.production}
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt:
+      - no-new-privileges:true
+
+  prometheus:
+    logging: *default-logging
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --storage.tsdb.retention.size=10GB
+      - --web.enable-lifecycle
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/prometheus-alerts.yml:/etc/prometheus/prometheus-alerts.yml:ro
+      - ./deploy/runtime/prometheus_metrics_token:/run/secrets/prometheus_metrics_token:ro
+      - prometheus_data:/prometheus
+    networks:
+      - edge
+      - monitoring
+    depends_on:
+      api:
+        condition: service_healthy
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  edge:
+  # Outbound-only application traffic, isolated from the public edge and data services.
+  egress:
+  data:
+    internal: true
+  monitoring:
+    internal: true
+
+volumes:
+  caddy_data:
+  caddy_config:
+  postgres_data:
+  qdrant_storage:
+  qdrant_snapshots:
+  redis_data:
+  fastembed_cache:
+  web_sync_worker_status:
+  widget_assets:
+  prometheus_data:

@@ -1,0 +1,48 @@
+groups:
+  - name: customer-support-agent
+    rules:
+      - alert: SupportApiHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_class="5xx"}[5m]))
+          / clamp_min(sum(rate(http_requests_total[5m])), 1) > 0.01
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Support API 5xx rate is above 1%"
+      - alert: SupportApiP95TooSlow
+        expr: |
+          histogram_quantile(0.95, sum by (le) (
+            rate(http_request_duration_seconds_bucket[10m])
+          )) > 3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Support API P95 latency is above 3 seconds"
+      - alert: SupportApiScrapeMissing
+        expr: up{job="support-api"} == 0
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus cannot see support API metrics"
+      - alert: SupportAgentStageP95TooSlow
+        expr: |
+          histogram_quantile(0.95, sum by (le, stage) (
+            rate(agent_stage_duration_seconds_bucket[10m])
+          )) > 3
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "A support-agent graph stage has P95 latency above 3 seconds"
+      - alert: SupportModelCallErrorRateHigh
+        expr: |
+          sum by (task) (rate(model_call_duration_seconds_count{outcome="error"}[10m]))
+          / clamp_min(sum by (task) (rate(model_call_duration_seconds_count[10m])), 0.001) > 0.05
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "A support-agent model task error rate is above 5%"

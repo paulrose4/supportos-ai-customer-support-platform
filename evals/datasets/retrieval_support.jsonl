@@ -1,0 +1,10 @@
+{"id":"drone-sku-en","tenant_id":"tenant-demo","query":"DRONE-100 weight camera price and stock","language":"en","expected_product_identifiers":["DRONE-100"],"expected_document_ids":["demo-product-aerolite-drone"]}
+{"id":"drone-price-zh","tenant_id":"tenant-demo","query":"DRONE-100 价格是多少","language":"zh-CN","expected_product_identifiers":["DRONE-100"],"expected_document_ids":["demo-product-aerolite-drone"]}
+{"id":"drone-features-en","tenant_id":"tenant-demo","query":"Does AeroLite include a 4K camera and battery?","language":"en","expected_document_ids":["demo-product-aerolite-drone"]}
+{"id":"air-purifier-room-en","tenant_id":"tenant-demo","query":"AIR-200 room coverage and sleep noise","language":"en","expected_product_identifiers":["AIR-200"],"expected_document_ids":["demo-product-air-purifier"]}
+{"id":"air-purifier-filter-zh","tenant_id":"tenant-demo","query":"AIR-200 使用什么过滤器","language":"zh-CN","expected_product_identifiers":["AIR-200"],"expected_document_ids":["demo-product-air-purifier"]}
+{"id":"shipping-processing-en","tenant_id":"tenant-demo","query":"order processing and carrier delivery time","language":"en","expected_document_ids":["demo-policy-shipping"]}
+{"id":"shipping-guarantee-en","tenant_id":"tenant-demo","query":"Can you guarantee my arrival date?","language":"en","expected_document_ids":["demo-policy-shipping"]}
+{"id":"returns-window-en","tenant_id":"tenant-demo","query":"How many days do I have to request a return?","language":"en","expected_document_ids":["demo-policy-returns"]}
+{"id":"returns-approval-zh","tenant_id":"tenant-demo","query":"客服可以直接保证退货批准吗","language":"zh-CN","expected_document_ids":["demo-policy-returns"]}
+{"id":"legal-us","tenant_id":"tenant-demo","query":"Texas consumer drone purchase and ownership guidance","language":"en","expected_document_ids":["demo-us-consumer-drone-purchase-guidance"]}

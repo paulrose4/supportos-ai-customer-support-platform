@@ -1,0 +1,69 @@
+groups:
+  - name: support-presence-capacity
+    rules:
+      - alert: PresenceApiP95TooHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(http_request_duration_seconds_bucket{
+                method="POST",
+                route="/v1/public-widget/presence"
+              }[5m])
+            )
+          ) > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Public Presence API P95 latency is above 250 ms
+
+      - alert: PresenceApiServerErrorRateHigh
+        expr: |
+          (
+            sum(rate(http_responses_total{
+              method="POST",
+              route="/v1/public-widget/presence",
+              status_code=~"5.."
+            }[5m]))
+            /
+            clamp_min(sum(rate(http_responses_total{
+              method="POST",
+              route="/v1/public-widget/presence"
+            }[5m])), 1)
+          ) > 0.005
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: Public Presence API server error rate is above 0.5 percent
+
+      - alert: PresenceApiUnexpectedRateLimit
+        expr: |
+          sum(increase(http_responses_total{
+            method="POST",
+            route="/v1/public-widget/presence",
+            status_code="429"
+          }[5m])) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Public Presence API is rate limiting visitors
+
+      - alert: PresenceAdminListP95TooHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(http_request_duration_seconds_bucket{
+                method="GET",
+                route="/v1/admin/presence"
+              }[5m])
+            )
+          ) > 0.25
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Administrator Presence list P95 latency is above 250 ms

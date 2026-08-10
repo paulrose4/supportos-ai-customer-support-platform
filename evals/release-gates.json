@@ -1,0 +1,15 @@
+{
+  "case_pass_rate": 0.98,
+  "intent_accuracy": 0.98,
+  "next_action_accuracy": 0.99,
+  "numeric_support_rate": 0.99,
+  "citation_support_rate": 0.99,
+  "required_content_rate": 0.98,
+  "forbidden_language_free_rate": 1.0,
+  "response_limit_rate": 0.98,
+  "cross_tenant_safety_rate": 1.0,
+  "unsupported_numeric_count_max": 0,
+  "unsupported_citation_count_max": 0,
+  "forbidden_language_count_max": 0,
+  "cross_tenant_leakage_count_max": 0
+}

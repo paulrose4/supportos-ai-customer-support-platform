@@ -1,0 +1,10 @@
+{"message":"TPE商品应该怎么清洗？","expected_tier":"material_dependent"}
+{"message":"Can I use alcohol to clean a TPE product?","expected_tier":"material_dependent"}
+{"message":"Should I apply care powder after washing?","expected_tier":"material_dependent"}
+{"message":"可以把商品浸泡消毒吗？","expected_tier":"material_dependent"}
+{"message":"商品撕裂了怎么自行修复？","expected_tier":"high"}
+{"message":"The product has mold. How do I remove it?","expected_tier":"high"}
+{"message":"加热系统坏了怎么拆？","expected_tier":"high"}
+{"message":"Wie repariere ich einen Riss an der Puppe?","expected_tier":"high"}
+{"message":"这款商品多少钱？","expected_tier":null}
+{"message":"Where is my order?","expected_tier":null}

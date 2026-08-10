@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "supportos"
+version = "0.1.0"
+description = "Multi-tenant AI customer support platform. Live at livechatgo.com."
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "alembic>=1.16,<2",
+  "asyncpg>=0.30,<1",
+  "boto3>=1.40,<2",
+  "fastapi>=0.139,<1",
+  "fastembed>=0.8,<0.9",
+  "langgraph>=1.2,<2",
+  "openai>=1.109,<3",
+  "pillow>=11.3,<13",
+  "pgvector>=0.4,<1",
+  "pydantic>=2.12,<3",
+  "pydantic-settings>=2.14,<3",
+  "dnspython>=2.7,<3",
+  "prometheus-client>=0.22,<1",
+  "python-frontmatter>=1.1,<2",
+  "qdrant-client>=1.18,<2",
+  "redis>=5.2,<7",
+  "selectolax>=0.3.32,<1",
+  "sqlalchemy[asyncio]>=2.0.51,<3",
+  "structlog>=25.4,<26",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx2>=2.5,<3",
+  "pytest>=8.4,<10",
+  "pytest-asyncio>=1.1,<2",
+  "ruff>=0.12,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = ["integration: requires an infrastructure adapter or service"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+exclude = ["migrations/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+
+[tool.ruff.format]
+quote-style = "double"

@@ -1,0 +1,3 @@
+{"id":"public-001","message":"如何使用产品？","expected_risk":0,"expected_kind":"answer"}
+{"id":"risk2-001","message":"我要退款","expected_risk":2,"expected_kind":"handoff"}
+{"id":"risk3-001","message":"怀疑账户被盗号","expected_risk":3,"expected_kind":"handoff"}

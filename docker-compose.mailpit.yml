@@ -1,0 +1,23 @@
+services:
+  mailpit:
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
+
+  api:
+    environment:
+      # Local-only SMTP sink. Mailpit accepts messages without authentication.
+      TRANSACTIONAL_EMAIL_ENABLED: "true"
+      EMPLOYEE_ENROLLMENT_ENABLED: "true"
+      SELF_SERVICE_SIGNUP_ENABLED: "true"
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      SMTP_FROM_ADDRESS: no-reply@local.test
+      SMTP_USE_STARTTLS: "false"
+    depends_on:
+      mailpit:
+        condition: service_started

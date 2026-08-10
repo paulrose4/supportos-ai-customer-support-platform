@@ -1,0 +1,27 @@
+name: support-presence-load-test
+
+services:
+  presence-load:
+    image: ${K6_IMAGE:-grafana/k6:0.57.0}
+    environment:
+      BASE_URL: ${BASE_URL:?Set BASE_URL to the staging API origin}
+      ORIGIN: ${ORIGIN:?Set ORIGIN to the registered staging site origin}
+      PUBLIC_WIDGET_ID: ${PUBLIC_WIDGET_ID:?Set PUBLIC_WIDGET_ID}
+      PROFILE: ${PROFILE:-smoke}
+      CONFIRM_STAGING: ${CONFIRM_STAGING:-0}
+      SHARD_ID: ${SHARD_ID:-0}
+      VUS: ${VUS:-10}
+      HEARTBEAT_MIN_SECONDS: ${HEARTBEAT_MIN_SECONDS:-20}
+      HEARTBEAT_MAX_SECONDS: ${HEARTBEAT_MAX_SECONDS:-25}
+      ADMIN_SESSION_TOKEN: ${ADMIN_SESSION_TOKEN:-}
+      ADMIN_COOKIE_NAME: ${ADMIN_COOKIE_NAME:-support_admin_session}
+      ADMIN_EXPECTED_MIN_ITEMS: ${ADMIN_EXPECTED_MIN_ITEMS:-9800}
+      ADMIN_TEST_DURATION: ${ADMIN_TEST_DURATION:-30m}
+      SUMMARY_PATH: ${SUMMARY_PATH:-/results/presence-summary.json}
+    volumes:
+      - ./tests/load:/scripts:ro
+      - ./load-test-results:/results
+    command: ["run", "/scripts/${K6_SCRIPT:-presence.js}"]
+    init: true
+    security_opt:
+      - no-new-privileges:true

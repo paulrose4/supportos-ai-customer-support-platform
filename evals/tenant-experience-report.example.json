@@ -1,0 +1,24 @@
+{
+  "status": "completed",
+  "sample_count": 30,
+  "metrics": {
+    "metrics_schema_version": 2,
+    "dataset_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "deduplicated_case_count": 30,
+    "minimum_segment_samples": 10,
+    "issue_segmentation_accuracy": 0.97,
+    "outcome_label_accuracy": 0.97,
+    "baseline_release_version": "experience-v0",
+    "evaluated_memory_ids": ["replace-with-memory-id"],
+    "cross_tenant_leakage": 0,
+    "stale_memory_usage": 0,
+    "unredacted_experience": 0,
+    "precision_at_1": 0.85,
+    "negative_transfer_rate": 0.0,
+    "correct_handoff_recall_delta": 0.0,
+    "reopen_rate_delta": 0.0,
+    "human_correction_rate_delta": 0.0,
+    "retrieval_p95_ms": 100.0,
+    "deletion_propagation_rate": 1.0
+  }
+}

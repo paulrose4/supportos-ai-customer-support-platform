@@ -844,10 +844,10 @@ def _render_fact_answer(
 
 _DIMENSION_ALIASES = {
     "height": ("height", "tall", "身高", "高度"),
-    "bra_size": ("bra size", "cup size", "cup", "罩杯", "胸罩"),
-    "oral_depth": ("oral depth", "mouth depth", "口腔深度", "口深"),
-    "vaginal_depth": ("vaginal depth", "vagina depth", "阴道深度"),
-    "anal_depth": ("anal depth", "anus depth", "肛门深度"),
+    "length": ("length", "long", "长度"),
+    "width": ("width", "wide", "宽度"),
+    "depth": ("depth", "deep", "深度"),
+    "diameter": ("diameter", "diam", "直径"),
     "package_size": ("package size", "package dimensions", "包装尺寸", "包装大小"),
     "bust": ("bust", "chest", "胸围"),
     "waist": ("waist", "腰围"),

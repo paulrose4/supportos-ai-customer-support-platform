@@ -79,7 +79,7 @@ class ConversationPlaybookCard:
     follow_up_key: str | None
     prohibited_claims: tuple[str, ...]
     risk_level: int = 0
-    version: str = "adult-retail-playbook-v1"
+    version: str = "general-retail-playbook-v1"
 
 
 @dataclass(frozen=True, slots=True)

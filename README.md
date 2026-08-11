@@ -29,6 +29,8 @@
   &nbsp;·&nbsp;
   <a href="docs/engineering-case-study.zh-CN.md">工程案例</a>
   &nbsp;·&nbsp;
+  <a href="docs/public-release-provenance.zh-CN.md">公开发布说明</a>
+  &nbsp;·&nbsp;
   <a href="docs/server-deployment-guide.zh-CN.md">生产部署指南</a>
 </p>
 
@@ -44,7 +46,8 @@
 
 SupportOS 是部署在 [LiveChatGo](https://livechatgo.com/) 上的多租户智能客服平台，由三部分组成：
 
-这是公司内部核心项目，由我独立负责需求分析、产品建模、架构设计、前后端与 Agent 开发、部署和持续维护。
+这是公司内部核心项目，于 2026 年 7 月中旬启动。项目在职期间的需求分析、产品建模、架构设计、
+Agent/RAG、前后端实现、测试、部署上线与迭代维护均由我独立负责，并结合客服和运营人员的业务反馈持续调整。
 平台已接入约 10 个多品类独立站，并按 6 个真实业务工作区管理与隔离，主要供企业内部客服与运营团队使用。
 
 1. 面向访客的公开聊天组件和网站连接器。
@@ -52,7 +55,10 @@ SupportOS 是部署在 [LiveChatGo](https://livechatgo.com/) 上的多租户智�
 3. 面向人工客服和管理员的运营工作台。
 
 > [!NOTE]
-> 本仓库为经公司明确授权公开的真实业务项目源码。公开内容不包含真实客户 PII、密钥或私有运营数据，截图中的敏感垂直业务内容均已移除或脱敏。仓库中的示例域名、SKU、商品、政策和 Eval 检索语料均为合成数据。
+> 本仓库为经公司明确授权公开的真实业务项目源码。为避免原始提交历史中的客户信息、内部配置、
+> 运营数据和个人材料泄露，公开仓库从经过安全审计的代码快照重新建立，因此公开提交数量不代表完整开发周期。
+> 公开内容不包含真实客户 PII、密钥或私有运营数据；示例域名、SKU、商品、政策和 Eval 检索语料均为合成数据。
+> 详细边界见[公开发布与项目溯源说明](docs/public-release-provenance.zh-CN.md)。
 
 <details>
 <summary><strong>企业内部工作区邀请码准入</strong></summary>
@@ -453,6 +459,7 @@ pwsh -File scripts/deploy.ps1 -EnvFile .env.production
 | 主题 | 文档 |
 | --- | --- |
 | 工程案例 | [SupportOS 工程案例](docs/engineering-case-study.zh-CN.md) |
+| 公开发布 | [项目溯源与公开边界](docs/public-release-provenance.zh-CN.md)、[公开变更记录](CHANGELOG.md) |
 | 项目全貌 | [项目深度解读](docs/current-project-deep-dive.zh-CN.md)、[面向管理者的项目说明](docs/boss-project-explanation.zh-CN.md) |
 | 架构与风险 | [系统架构](docs/architecture.md)、[安全设计](docs/security.md)、[风险矩阵](docs/risk_matrix.md) |
 | 身份与租户 | [管理员认证](docs/admin-authentication.md)、[邮箱邀请](docs/email-invitation-auth.md)、[数据库角色与 RLS](docs/database-roles-and-rls.md) |
